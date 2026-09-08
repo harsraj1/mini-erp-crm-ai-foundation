@@ -7,4 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Domain models and their migrations begin in Phase 1.
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

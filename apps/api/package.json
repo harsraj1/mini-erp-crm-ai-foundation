@@ -1,14 +1,40 @@
 {
-  "name": "@mini-erp/api", "private": true, "version": "0.0.0", "type": "module",
+  "name": "@mini-erp/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "prisma generate && tsc",
-    "typecheck": "prisma generate && tsc --noEmit",
+    "typecheck": "prisma generate && tsc -p tsconfig.check.json",
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
-    "db:check": "tsx src/scripts/check-db.ts"
+    "db:check": "tsx src/scripts/check-db.ts",
+    "test": "vitest run",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
   },
-  "dependencies": { "@prisma/client": "6.19.0", "cors": "^2.8.5", "dotenv": "^16.6.1", "express": "^5.1.0", "zod": "^3.25.76" },
-  "devDependencies": { "@types/cors": "^2.8.19", "@types/express": "^5.0.3", "@types/node": "^22.18.0", "prisma": "6.19.0", "tsx": "^4.20.5", "typescript": "~5.9.2" }
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.18.0",
+    "@types/supertest": "^6.0.3",
+    "prisma": "6.19.0",
+    "supertest": "^7.2.2",
+    "tsx": "^4.20.5",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.7"
+  }
 }

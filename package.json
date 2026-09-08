@@ -1,7 +1,14 @@
 {
-  "name": "mini-erp-crm", "private": true, "version": "0.0.0",
-  "workspaces": ["apps/api", "apps/web"],
-  "engines": { "node": ">=22.12.0" },
+  "name": "mini-erp-crm",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "db:up": "docker compose --env-file apps/api/.env up -d --wait db",
     "db:stop": "docker compose --env-file apps/api/.env stop db",
@@ -11,6 +18,9 @@
     "typecheck": "npm run typecheck --workspaces",
     "db:generate": "npm run db:generate --workspace @mini-erp/api",
     "db:validate": "npm run db:validate --workspace @mini-erp/api",
-    "db:check": "npm run db:check --workspace @mini-erp/api"
+    "db:check": "npm run db:check --workspace @mini-erp/api",
+    "test": "npm run test --workspace @mini-erp/api",
+    "db:migrate": "npm run db:migrate --workspace @mini-erp/api",
+    "db:seed": "npm run db:seed --workspace @mini-erp/api"
   }
 }
