@@ -1,0 +1,14 @@
+{
+  "name": "@mini-erp/api", "private": true, "version": "0.0.0", "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "prisma generate && tsc",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "start": "node dist/server.js",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:check": "tsx src/scripts/check-db.ts"
+  },
+  "dependencies": { "@prisma/client": "6.19.0", "cors": "^2.8.5", "dotenv": "^16.6.1", "express": "^5.1.0", "zod": "^3.25.76" },
+  "devDependencies": { "@types/cors": "^2.8.19", "@types/express": "^5.0.3", "@types/node": "^22.18.0", "prisma": "6.19.0", "tsx": "^4.20.5", "typescript": "~5.9.2" }
+}
