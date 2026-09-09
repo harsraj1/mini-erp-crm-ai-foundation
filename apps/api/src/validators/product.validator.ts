@@ -1,0 +1,9 @@
+import { z } from 'zod';
+export const productCreateSchema=z.object({productName:z.string().trim().min(1).max(200),sku:z.string().trim().min(1).max(100).transform(s=>s.toUpperCase()),category:z.string().trim().min(1).max(100),unitPrice:z.union([z.string().regex(/^\d+(\.\d{1,2})?$/),z.number().finite().nonnegative()]).refine(v=>Number(v)<=9999999999.99 && Number.isInteger(Math.round(Number(v)*10000)/100)).transform(v=>Number(v).toFixed(2)),currentStock:z.number().int().nonnegative().max(2147483647).default(0),minimumStockAlertQuantity:z.number().int().nonnegative().max(2147483647).default(0),warehouseLocation:z.string().trim().min(1).max(200)});
+export const productUpdateSchema=productCreateSchema.omit({currentStock:true}).partial().refine(v=>Object.keys(v).length>0);
+export const productParamsSchema=z.object({id:z.string().cuid()});
+export const productQuerySchema=z.object({page:z.coerce.number().int().positive().default(1),limit:z.coerce.number().int().positive().max(100).default(20),search:z.string().trim().optional(),category:z.string().trim().optional()});
+export const movementSchema=z.object({quantityChanged:z.number().int().positive().max(2147483647),movementType:z.enum(['IN','OUT']),reason:z.string().trim().min(1).max(500)});
+export const movementQuerySchema=z.object({page:z.coerce.number().int().positive().default(1),limit:z.coerce.number().int().positive().max(100).default(20),productId:z.string().cuid().optional(),movementType:z.enum(['IN','OUT']).optional()});
+export type ProductCreate=z.infer<typeof productCreateSchema>; export type ProductUpdate=z.infer<typeof productUpdateSchema>; export type ProductQuery=z.infer<typeof productQuerySchema>; export type MovementInput=z.infer<typeof movementSchema>; export type MovementQuery=z.infer<typeof movementQuerySchema>;
+

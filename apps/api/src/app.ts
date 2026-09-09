@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
 import { authRouter } from './routes/auth.routes.js';
+import { customerRouter } from './routes/customer.routes.js';
+import { productRouter, stockMovementRouter } from './routes/product.routes.js';
+import { challanRouter } from './routes/challan.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
 
 export const app = express();
@@ -14,6 +17,10 @@ app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok' } });
 });
 app.use('/api/auth', authRouter);
+app.use('/api/customers', customerRouter);
+app.use('/api/products', productRouter);
+app.use('/api/stock-movements', stockMovementRouter);
+app.use('/api/challans', challanRouter);
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Route not found' } });
 });
