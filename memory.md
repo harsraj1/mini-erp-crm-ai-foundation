@@ -589,3 +589,11 @@ Keep old major decisions; remove stale transient details when they no longer hel
 - Added repository-root `vercel.json` with the requested SPA rewrite to `/index.html`.
 - Prepared source, package-lock.json, documentation, and all five Prisma migrations for GitHub. Actual `.env` files remain ignored; tracked `.env.example` files contain setup defaults only.
 - Vercel JSON verification PASS; frontend production build PASS. Full build is blocked locally by an EPERM error replacing the Prisma engine DLL, including on retry outside the sandbox. No deployment is claimed.
+
+### 2026-09-09 — Draft challan cancellation UI
+
+- Added Cancel Challan beside Confirm Challan on saved drafts/detail, using the existing POST /api/challans/:id/cancel API. Admin/Sales only; backend remains authoritative.
+- Shared action dialog asks for confirmation, prevents simultaneous/double submissions, retains errors for retry and uses returned status. Cancellation does not change stock. Confirmed/cancelled records expose no mutation actions.
+- Corrected the saved-record message for CANCELLED so it does not incorrectly report confirmation.
+- Files: apps/web/src/api/challans.ts, pages/challans/Challans.tsx, styles/global.css, tests/challans.test.tsx, memory.md.
+- Actual verification: frontend tests PASS (33), frontend typecheck PASS, frontend production build PASS. No backend changes, database writes or deployment performed. Publish the frontend changes to Vercel to expose the button on the hosted application.

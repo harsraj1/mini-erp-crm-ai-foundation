@@ -7,7 +7,7 @@ import { challansApi,type Challan } from '../api/challans';
 import { customersApi } from '../api/customers';
 import { productsApi } from '../api/products';
 vi.mock('../contexts/AuthContext',()=>({useAuth:()=>({user:{role:'SALES'}})}));
-vi.mock('../api/challans',()=>({challansApi:{list:vi.fn(),create:vi.fn(),confirm:vi.fn()}}));
+vi.mock('../api/challans',()=>({challansApi:{list:vi.fn(),create:vi.fn(),confirm:vi.fn(),cancel:vi.fn()}}));
 vi.mock('../api/customers',()=>({customersApi:{list:vi.fn()}}));
 vi.mock('../api/products',()=>({productsApi:{list:vi.fn()}}));
 const customer={id:'c1',customerName:'Customer',businessName:'Business'};
@@ -37,4 +37,23 @@ it('adds and removes rows and retains form values on server rejection',async()=>
 });
 it('shows loading and empty list',async()=>{
  vi.mocked(challansApi.list).mockResolvedValue({challans:[],pagination:{totalPages:0}});render(<MemoryRouter><ChallanList/></MemoryRouter>);expect(screen.getByRole('status')).toHaveTextContent('Loading');await screen.findByText('No challans found.');expect(screen.getByRole('button',{name:'Next'})).toBeDisabled();
+});
+
+it('cancels a saved draft only after confirmation and updates its status',async()=>{
+ vi.mocked(challansApi.cancel).mockResolvedValue({...c,status:'CANCELLED'});
+ render(<MemoryRouter><ChallanCreate/></MemoryRouter>);const u=userEvent.setup();
+ await u.selectOptions(await screen.findByLabelText('Customer *'),'c1');await u.selectOptions(screen.getByLabelText('Product 1 *'),'p1');
+ await u.click(screen.getByRole('button',{name:'Save Draft'}));await screen.findByText('Draft saved. Stock has not changed.');
+ await u.click(screen.getByRole('button',{name:'Cancel Challan'}));expect(challansApi.cancel).not.toHaveBeenCalled();
+ await u.click(screen.getByRole('button',{name:'Yes, cancel challan'}));await screen.findByText('Challan cancelled. Stock has not changed.');
+ expect(challansApi.cancel).toHaveBeenCalledWith('draft1');expect(screen.getByText('CANCELLED')).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Confirm Challan'})).not.toBeInTheDocument();
+});
+it('preserves draft on cancellation failure and supports retry',async()=>{
+ vi.mocked(challansApi.cancel).mockRejectedValueOnce({isAxiosError:true,response:{data:{error:{message:'Cannot cancel right now'}}}}).mockResolvedValue({...c,status:'CANCELLED'});
+ render(<MemoryRouter><ChallanCreate/></MemoryRouter>);const u=userEvent.setup();
+ await u.selectOptions(await screen.findByLabelText('Customer *'),'c1');await u.selectOptions(screen.getByLabelText('Product 1 *'),'p1');
+ await u.click(screen.getByRole('button',{name:'Save Draft'}));await u.click(await screen.findByRole('button',{name:'Cancel Challan'}));
+ await u.click(screen.getByRole('button',{name:'Yes, cancel challan'}));await screen.findByText('Cannot cancel right now');expect(screen.getByText('DRAFT')).toBeInTheDocument();
+ await u.click(screen.getByRole('button',{name:'Yes, cancel challan'}));await screen.findByText('CANCELLED');
 });
