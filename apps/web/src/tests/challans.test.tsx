@@ -22,7 +22,7 @@ beforeEach(()=>{
 it('saves a draft and preserves it through insufficient-stock retry without creating twice',async()=>{
  render(<MemoryRouter><ChallanCreate/></MemoryRouter>);const u=userEvent.setup();
  await u.selectOptions(await screen.findByLabelText('Customer *'),'c1');await u.selectOptions(screen.getByLabelText('Product 1 *'),'p1');
- expect(screen.getByText('Available stock: 5')).toBeInTheDocument();
+ expect(screen.getByText('Available stock').parentElement).toHaveTextContent('5');
  await u.click(screen.getByRole('button',{name:'Save Draft'}));await screen.findByText('Draft saved. Stock has not changed.');
  expect(challansApi.create).toHaveBeenCalledWith({customerId:'c1',items:[{productId:'p1',quantity:1}]});
  vi.mocked(challansApi.confirm).mockRejectedValueOnce({isAxiosError:true,response:{data:{error:{message:'Insufficient stock for SKU'}}}}).mockResolvedValue({...c,status:'CONFIRMED'});

@@ -1,0 +1,54 @@
+import { beforeEach, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { ProductList } from '../pages/products/ProductList';
+import { ProductForm } from '../pages/products/ProductForm';
+import { productsApi } from '../api/products';
+import type { Product } from '../types';
+vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ user: { role: 'ADMIN' } }) }));
+vi.mock('../api/products', () => ({ productsApi: { list: vi.fn(), adjust: vi.fn(), detail: vi.fn(), update: vi.fn(), create: vi.fn() } }));
+const product: Product = { id: 'p1', productName: 'Widget', sku: 'SKU', category: 'General', unitPrice: '12.50', currentStock: 5, minimumStockAlertQuantity: 2, warehouseLocation: 'A1', createdAt: '', updatedAt: '' };
+beforeEach(() => {
+  vi.resetAllMocks();
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
+  vi.mocked(productsApi.list).mockResolvedValue({ products: [product], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } });
+  vi.mocked(productsApi.detail).mockResolvedValue(product);
+});
+it('keeps adjustment errors and values inside the dialog, then retries the same payload once', async () => {
+  const u = userEvent.setup(); render(<MemoryRouter><ProductList /></MemoryRouter>);
+  await u.click(await screen.findByRole('button', { name: 'Adjust' }));
+  const dialog = screen.getByRole('dialog', { name: 'Adjust stock' });
+  await u.selectOptions(within(dialog).getByLabelText('Movement type'), 'OUT');
+  await u.type(within(dialog).getByLabelText('Reason *'), 'Dispatch correction');
+  vi.mocked(productsApi.adjust).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(product);
+  await u.click(within(dialog).getByRole('button', { name: 'Save adjustment' }));
+  expect(await within(dialog).findByRole('alert')).toBeVisible();
+  expect(within(dialog).getByLabelText('Reason *')).toHaveValue('Dispatch correction');
+  await u.click(within(dialog).getByRole('button', { name: 'Save adjustment' }));
+  expect(await screen.findByText('Stock adjustment saved.')).toBeVisible();
+  expect(productsApi.adjust).toHaveBeenCalledTimes(2);
+  expect(productsApi.adjust).toHaveBeenLastCalledWith('p1', { movementType: 'OUT', quantityChanged: 1, reason: 'Dispatch correction' });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+it('restores focus after dismissal and prevents repeated adjustment submissions while saving', async () => {
+  const u = userEvent.setup(); render(<MemoryRouter><ProductList /></MemoryRouter>);
+  const trigger = await screen.findByRole('button', { name: 'Adjust' }); await u.click(trigger);
+  await u.click(screen.getByRole('button', { name: 'Cancel' })); expect(trigger).toHaveFocus();
+  await u.click(trigger); await u.type(screen.getByLabelText('Reason *'), 'Count correction');
+  vi.mocked(productsApi.adjust).mockReturnValue(new Promise(() => {}));
+  await u.dblClick(screen.getByRole('button', { name: 'Save adjustment' }));
+  expect(productsApi.adjust).toHaveBeenCalledTimes(1); expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true })); expect(screen.getByRole('dialog')).toBeVisible();
+});
+it('shows product field errors without losing input and excludes current stock from edit payloads', async () => {
+  const u = userEvent.setup(); render(<MemoryRouter initialEntries={['/products/p1/edit']}><Routes><Route path="/products/:id/edit" element={<ProductForm />} /><Route path="/products" element={<ProductList />} /></Routes></MemoryRouter>);
+  const sku = await screen.findByLabelText('SKU *'); await u.clear(sku); await u.type(sku, 'DUPLICATE');
+  vi.mocked(productsApi.update).mockRejectedValueOnce({ isAxiosError: true, response: { data: { error: { message: 'Check product details', details: [{ field: 'sku', message: 'SKU already exists' }] } } } }).mockResolvedValueOnce(product);
+  await u.click(screen.getByRole('button', { name: 'Save product' }));
+  expect(await screen.findByText('SKU already exists')).toBeVisible(); expect(sku).toHaveValue('DUPLICATE'); expect(sku).toHaveAttribute('aria-invalid', 'true');
+  await u.click(screen.getByRole('button', { name: 'Save product' }));
+  await waitFor(() => expect(screen.getByText('Product updated.')).toBeVisible());
+  expect(productsApi.update).toHaveBeenLastCalledWith('p1', { productName: 'Widget', sku: 'DUPLICATE', category: 'General', unitPrice: 12.5, minimumStockAlertQuantity: 2, warehouseLocation: 'A1' });
+});

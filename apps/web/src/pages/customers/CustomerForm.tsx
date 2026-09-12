@@ -13,7 +13,7 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<CustomerValues>({ resolver: zodResolver(customerSchema), defaultValues: customer ? valuesFor(customer) : defaults });
   const input = (name: keyof CustomerValues) => ({ id: name, ...register(name), 'aria-invalid': !!errors[name], 'aria-describedby': errors[name] ? `${name}-error` : undefined });
   const back = customer ? `/customers/${customer.id}` : '/customers';
-  return <><Link className="back" to={back}>← {customer ? 'Customer detail' : 'Customers'}</Link><PageHeader title={customer ? 'Edit customer' : 'Add customer'} description="Keep contact and business information up to date." />
+  return <><Link className="back" to={back}>← {customer ? 'Back to customer' : 'Back to customers'}</Link><PageHeader title={customer ? 'Edit customer' : 'Add customer'} description="Keep contact and business information up to date." />
     <form className="card" noValidate onSubmit={handleSubmit(async (values) => {
       setErrorMessage('');
       try { const payload = customerPayload(values, customer); const saved = customer ? await customersApi.update(customer.id, payload) : await customersApi.create(payload);

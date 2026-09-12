@@ -132,3 +132,51 @@ dd { margin: 0; font-size: 14px; line-height: 1.6; white-space: pre-wrap; overfl
 .danger-outline { color:#b42318; border-color:#b42318; }
 .danger-outline:hover { background:#fef3f2; }
 .challan-actions { flex-wrap:wrap; }
+
+/* Shared operations interface */
+:root { --surface: #fff; --surface-muted: #f8fafc; --primary-soft: #eff6ff; --danger: #b42318; --radius: 8px; --space-section: 24px; }
+.sidebar nav a { color: var(--muted); border-left: 3px solid transparent; }
+.sidebar nav a:hover { color: #172033; background: var(--surface-muted); text-decoration: none; }
+.sidebar nav a.active { color: #1d4ed8; background: var(--primary-soft); border-left-color: var(--primary); }
+.card { border-radius: var(--radius); background: var(--surface); }
+.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.number-value { font-variant-numeric: tabular-nums; }
+table { min-width: 0; }
+.customer-table { min-width: 900px; }
+.product-table { min-width: 920px; }
+.challan-table { min-width: 660px; }
+.summary-table, .movement-table { min-width: 540px; }
+.table-scroll { isolation: isolate; }
+.customer-table th:first-child, .customer-table td:first-child, .product-table th:first-child, .product-table td:first-child, .challan-table th:first-child, .challan-table td:first-child { position: sticky; left: 0; background: var(--surface); z-index: 1; box-shadow: 1px 0 var(--border); min-width: 160px; max-width: 230px; }
+.customer-table th:first-child, .product-table th:first-child, .challan-table th:first-child { background: var(--surface-muted); }
+.scroll-hint { margin: 0; padding: 8px 20px; background: var(--surface-muted); border-bottom: 1px solid var(--border); }
+.row-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.ops-forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-items: start; }
+.ops-forms .form-grid { grid-template-columns: 1fr; }
+.operations-table { min-width: 850px; }
+.operations-table small { display: block; margin-top: 6px; }
+.link-button { padding: 6px 0; border: 0; background: transparent; color: var(--primary); font-weight: 500; }
+.badge.danger { color: var(--danger); background: #fef3f2; }
+.numeric .badge { margin-top: 6px; white-space: nowrap; }
+.stock-dialog { width: min(540px, calc(100vw - 32px)); max-height: 90dvh; overflow-y: auto; padding: 24px; border: 1px solid var(--border); border-radius: 12px; color: inherit; }
+.stock-dialog::backdrop { background: rgb(15 23 42 / 50%); }
+.form-section + .form-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.form-section legend { font-size: 18px; font-weight: 650; padding: 0 0 20px; }
+.product-form { max-width: 960px; }
+.product-summary { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 24px; margin: 0; }
+.history-card { margin-top: 24px; }
+.filters h2 { margin: 0; }
+.status-filter { width: 200px; margin: 0; }
+.line-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0; }
+.line-facts dd { font-weight: 600; font-variant-numeric: tabular-nums; }
+.challan-line { grid-template-columns: minmax(0,2fr) minmax(90px,.7fr) minmax(160px,1.3fr) auto; align-items: end; }
+.challan-line label { margin-bottom: 0; }
+.challan-footer { justify-content: space-between; align-items: center; background: var(--surface-muted); padding: 20px; border-radius: var(--radius); flex-wrap: wrap; }
+.skeleton { padding: 24px; display: grid; gap: 16px; }
+.skeleton-block { height: 44px; background: #edf0f4; border-radius: 6px; }
+.skeleton-form, .skeleton-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.skeleton-form .skeleton-block { height: 80px; }
+.skeleton-metrics { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 0; gap: 24px; }
+.skeleton-metrics .skeleton-block { height: 140px; }
+@media (max-width: 1023px) { .product-summary, .skeleton-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .challan-line { grid-template-columns: minmax(0,1fr) minmax(100px,.5fr); } }
+@media (max-width: 767px) { .product-summary, .skeleton-form, .skeleton-metrics, .challan-line { grid-template-columns: 1fr; } .stock-dialog { padding: 20px 16px; } .challan-footer { padding: 16px; gap: 16px; } .challan-footer .actions { width: 100%; justify-content: flex-end; } .row-actions { min-width: 100px; } .status-filter { width: 100%; } }

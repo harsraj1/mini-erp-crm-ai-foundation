@@ -15,7 +15,7 @@ try {
     return prisma.user.upsert({ where: { email }, update: {},
       create: { name: `Demo ${role.toLowerCase()}`, email, passwordHash, role } });
   }));
-  console.log('Demo accounts ensured for all four roles. Existing accounts were preserved.');
+  console.log('Demo accounts ensured for all roles, including Operations. Existing accounts were preserved.');
 } finally {
   await prisma.$disconnect();
 }

@@ -1,5 +1,7 @@
 # Product Requirements Document — Mini ERP + CRM Operations Portal
 
+> **Current scope (2026-09-12):** The user approved Case Study 2, Mini Operations ERP. [Current requirements](docs/CASE2.md) supersede conflicting scope below. Required screens now cover Inventory, Work Orders, Internal Transfers and Customer Orders with Admin/Operations/Sales login. This earlier PRD is retained as history for the preserved legacy code/data.
+
 ## 1. Product Summary
 
 **Product name:** Mini ERP + CRM Operations Portal

@@ -6,6 +6,7 @@ import { customerRouter } from './routes/customer.routes.js';
 import { productRouter, stockMovementRouter } from './routes/product.routes.js';
 import { challanRouter } from './routes/challan.routes.js';
 import { errorHandler } from './middleware/error.middleware.js';
+import { operationsRouter } from './routes/operations.routes.js';
 
 export const app = express();
 app.disable('x-powered-by');
@@ -17,6 +18,7 @@ app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok' } });
 });
 app.use('/api/auth', authRouter);
+app.use('/api/operations', operationsRouter);
 app.use('/api/customers', customerRouter);
 app.use('/api/products', productRouter);
 app.use('/api/stock-movements', stockMovementRouter);

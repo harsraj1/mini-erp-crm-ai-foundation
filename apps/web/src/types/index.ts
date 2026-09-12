@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'ACCOUNTS';
+export type Role = 'ADMIN' | 'OPERATIONS' | 'SALES' | 'WAREHOUSE' | 'ACCOUNTS';
 export interface User { id: string; name: string; email: string; role: Role }
 export const customerTypes = ['RETAIL', 'WHOLESALE', 'DISTRIBUTOR'] as const;
 export const customerStatuses = ['LEAD', 'ACTIVE', 'INACTIVE'] as const;
@@ -15,7 +15,7 @@ export interface CustomerDetail extends Customer { followUps: FollowUp[] }
 export interface CustomerPage { customers: Customer[]; pagination: { page: number; limit: number; total: number; totalPages: number } }
 export type CustomerInput = Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>;
 export const canWriteCustomers = (role: Role) => role === 'ADMIN' || role === 'SALES';
-export const canReadCustomers = (role: Role) => role !== 'WAREHOUSE';
+export const canReadCustomers = (role: Role) => ['ADMIN', 'SALES', 'ACCOUNTS'].includes(role);
 export interface Product { id:string; productName:string; sku:string; category:string; unitPrice:string|number; currentStock:number; minimumStockAlertQuantity:number; warehouseLocation:string; createdAt:string; updatedAt:string; stockMovements?: StockMovement[] }
 export interface StockMovement { id:string; productId:string; quantityChanged:number; movementType:'IN'|'OUT'; reason:string; createdAt:string; product?:Product; createdBy:User }
 export interface ProductPage { products:Product[]; pagination:{page:number;limit:number;total:number;totalPages:number} }

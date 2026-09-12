@@ -1,5 +1,7 @@
 # Design System — Mini ERP + CRM Operations Portal
 
+> **Case Study 2 update (2026-09-12):** Retain the visual system below. Main navigation is Inventory, Work Orders, Internal Transfers and Customer Orders; Login is the entry screen. Use explicit Physical / Reserved / Available labels, backend-driven status and quantities, validation, pending-submit protection and confirmation for dispatch/receipt. Legacy pages remain in code but are absent from main navigation.
+
 ## 1. Design Goal
 
 Create a clean, professional, admin-style internal operations UI.

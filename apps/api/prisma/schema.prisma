@@ -9,6 +9,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  OPERATIONS
   SALES
   WAREHOUSE
   ACCOUNTS
@@ -25,6 +26,112 @@ model User {
   customerFollowUps CustomerFollowUp[]
   stockMovements StockMovement[]
   challansCreated Challan[]
+  assignedWorkOrders WorkOrder[] @relation("AssignedWorkOrders")
+  createdWorkOrders WorkOrder[] @relation("CreatedWorkOrders")
+  operationsTransfers InternalTransfer[]
+  operationsOrders CustomerOrder[]
+  inventoryEvents InventoryEvent[]
+}
+
+model Item {
+  id String @id @default(cuid())
+  name String
+  code String @unique
+  category String
+  balances InventoryBalance[]
+  workOrders WorkOrder[]
+}
+
+model Location {
+  id String @id @default(cuid())
+  name String @unique
+  balances InventoryBalance[]
+  workOrders WorkOrder[]
+  incomingTransfers InternalTransfer[]
+}
+
+model InventoryBalance {
+  id String @id @default(cuid())
+  itemId String
+  locationId String
+  batch String
+  physicalQuantity Int @default(0)
+  reservedQuantity Int @default(0)
+  item Item @relation(fields:[itemId], references:[id], onDelete:Restrict)
+  location Location @relation(fields:[locationId], references:[id], onDelete:Restrict)
+  events InventoryEvent[]
+  transfers InternalTransfer[]
+  orders CustomerOrder[]
+  @@unique([itemId, locationId, batch])
+}
+
+enum WorkOrderStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model WorkOrder {
+  id String @id @default(cuid())
+  requestId String @unique
+  itemId String
+  locationId String
+  requiredQuantity Int
+  assignedUserId String
+  createdById String
+  status WorkOrderStatus @default(ASSIGNED)
+  createdAt DateTime @default(now())
+  item Item @relation(fields:[itemId], references:[id], onDelete:Restrict)
+  location Location @relation(fields:[locationId], references:[id], onDelete:Restrict)
+  assignedUser User @relation("AssignedWorkOrders", fields:[assignedUserId], references:[id], onDelete:Restrict)
+  createdBy User @relation("CreatedWorkOrders", fields:[createdById], references:[id], onDelete:Restrict)
+}
+
+enum TransferStatus {
+  REQUESTED
+  DISPATCHED
+  RECEIVED
+}
+
+model InternalTransfer {
+  id String @id @default(cuid())
+  requestId String @unique
+  sourceBalanceId String
+  destinationLocationId String
+  quantity Int
+  status TransferStatus @default(REQUESTED)
+  createdById String
+  createdAt DateTime @default(now())
+  dispatchedAt DateTime?
+  receivedAt DateTime?
+  sourceBalance InventoryBalance @relation(fields:[sourceBalanceId], references:[id], onDelete:Restrict)
+  destinationLocation Location @relation(fields:[destinationLocationId], references:[id], onDelete:Restrict)
+  createdBy User @relation(fields:[createdById], references:[id], onDelete:Restrict)
+}
+
+model CustomerOrder {
+  id String @id @default(cuid())
+  requestId String @unique
+  customerName String
+  balanceId String
+  quantity Int
+  createdById String
+  createdAt DateTime @default(now())
+  balance InventoryBalance @relation(fields:[balanceId], references:[id], onDelete:Restrict)
+  createdBy User @relation(fields:[createdById], references:[id], onDelete:Restrict)
+}
+
+model InventoryEvent {
+  id String @id @default(cuid())
+  requestId String @unique
+  balanceId String
+  physicalChange Int
+  reservedChange Int
+  reason String
+  createdById String
+  createdAt DateTime @default(now())
+  balance InventoryBalance @relation(fields:[balanceId], references:[id], onDelete:Restrict)
+  createdBy User @relation(fields:[createdById], references:[id], onDelete:Restrict)
 }
 
 enum MovementType {

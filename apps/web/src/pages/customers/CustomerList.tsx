@@ -4,7 +4,7 @@ import { customersApi } from '../../api/customers';
 import { useResource } from '../../hooks/useResource';
 import { useAuth } from '../../contexts/AuthContext';
 import { canWriteCustomers, customerStatuses, customerTypes } from '../../types';
-import { Badge, dateLabel, ErrorAlert, label, Loading, PageHeader } from '../../components/ui';
+import { Badge, dateLabel, ErrorAlert, label, Skeleton, TableRegion, PageHeader } from '../../components/ui';
 
 export function CustomerList() {
   const { user } = useAuth(); const [params, setParams] = useSearchParams();
@@ -23,11 +23,11 @@ export function CustomerList() {
       <div className="field"><label htmlFor="type-filter">Customer type</label><select id="type-filter" value={customerType} onChange={(e) => filter('customerType', e.target.value)}><option value="">All types</option>{customerTypes.map((v) => <option key={v} value={v}>{label(v)}</option>)}</select></div>
       {(search || status || customerType) && <button type="button" onClick={() => { setParams({}); setDraft(''); setSearchError(''); }}>Clear filters</button>}
     </form>
-    {resource.loading ? <Loading /> : resource.error ? <ErrorAlert message={resource.error} retry={resource.retry} /> : resource.data && <>
+    {resource.loading ? <Skeleton /> : resource.error ? <ErrorAlert message={resource.error} retry={resource.retry} /> : resource.data && <>
       {resource.data.customers.length === 0 ? <div className="empty"><h2>No customers found</h2><p>{search || status || customerType ? 'Try another search or clear your filters.' : 'Customer relationships start here.'}</p>{writable && <Link to="/customers/new">Add a customer</Link>}</div> :
-      <div className="table-scroll" tabIndex={0} role="region" aria-label="Customer table"><table><thead><tr><th>Customer</th><th>Business</th><th>Mobile</th><th>Type</th><th>Status</th><th>Follow-up</th><th>Action</th></tr></thead><tbody>{resource.data.customers.map((customer) => <tr key={customer.id}>
+      <TableRegion name="Customer table"><table className="customer-table"><thead><tr><th>Customer</th><th>Business</th><th>Mobile</th><th>Type</th><th>Status</th><th>Follow-up</th><th>Action</th></tr></thead><tbody>{resource.data.customers.map((customer) => <tr key={customer.id}>
         <td><Link className="customer-name" to={`/customers/${customer.id}`}>{customer.customerName}</Link><small>{customer.email}</small></td><td>{customer.businessName}</td><td className="nowrap">{customer.mobileNumber}</td><td>{label(customer.customerType)}</td><td><Badge status={customer.status} /></td><td className="nowrap">{dateLabel(customer.followUpDate)}</td><td><Link to={`/customers/${customer.id}`} aria-label={`View ${customer.customerName}`}>View</Link></td>
-      </tr>)}</tbody></table></div>}
+      </tr>)}</tbody></table></TableRegion>}
       <div className="pagination"><span>{resource.data.pagination.total} customer{resource.data.pagination.total === 1 ? '' : 's'} · Page {page} of {Math.max(1, resource.data.pagination.totalPages)}</span><div className="actions">
         <button disabled={page <= 1} onClick={() => { const next = new URLSearchParams(params); next.set('page', String(page - 1)); setParams(next); }}>Previous</button>
         <button disabled={page >= resource.data.pagination.totalPages} onClick={() => { const next = new URLSearchParams(params); next.set('page', String(page + 1)); setParams(next); }}>Next</button>

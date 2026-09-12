@@ -22,7 +22,7 @@ beforeEach(()=>{
 for(const role of ['ADMIN','SALES','WAREHOUSE','ACCOUNTS'] as Role[]){
  it(`${role} can open dashboard with permitted metrics`,async()=>{
  auth.user.role=role;render(<MemoryRouter initialEntries={['/dashboard']}><App/></MemoryRouter>);
- await screen.findByText('Low stock');expect(screen.getByRole('link',{name:'Dashboard'})).toBeInTheDocument();
+ await screen.findByText('Low stock');expect(screen.getByRole('link',{name:'Inventory'})).toBeInTheDocument();
  expect(customersApi.list).toHaveBeenCalledTimes(role==='WAREHOUSE'?0:2);
  expect(screen.getByText('Test User')).toBeInTheDocument();
  });

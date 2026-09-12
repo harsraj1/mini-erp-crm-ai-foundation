@@ -1,5 +1,18 @@
 # Project Memory — Mini ERP + CRM Operations Portal
 
+## Current scope — 2026-09-12 Case Study 2
+
+The user authorized Mini Operations ERP from the new PDF, replacing visible CRM/challan navigation while preserving existing code/data. Read [docs/CASE2.md](docs/CASE2.md) first for current requirements; the previous history below is not the current scope. Required Case Study 2 implementation is verified locally. No new deployment or Neon migration was performed.
+
+- Added OPERATIONS role and additive Item/Location/InventoryBalance/InventoryEvent/WorkOrder/InternalTransfer/CustomerOrder schema and migration. Legacy tables remain unchanged; old Product stock is separate from new location/batch inventory.
+- `/api/operations` implements catalog/setup, paginated inventory/history, atomic IN/OUT, Admin work-order creation and assigned-user status progression, shortage/alternative-location checks, Requested→Dispatched→Received transfers, and concurrent-safe customer reservation. Row locks, unique request IDs and PostgreSQL CHECK constraints enforce stock safety. Stock/event/status changes share transactions.
+- Visible frontend: Login, Inventory, Work Orders, Internal Transfers, Customer Orders. Existing API client/design reused; role-aware forms, confirmation dialogs, validation/errors, duplicate-submit protection, confirmed refresh and responsive tables implemented. Legacy routes remain accessible for compatibility but are absent from main navigation.
+- Actual checks: all 124 backend tests (17 new Operations), all 44 frontend tests (eight new Operations), both typechecks and builds PASS. All six migrations applied to fresh isolated PostgreSQL 16 at localhost:55433; Prisma diff reported no difference. Schema validation, seed, SELECT 1 and compiled `/health` PASS.
+- Real local browser walkthrough passed for seeded Admin/Operations/Sales: created two locations and Cotton batches; required100 vs local60 showed shortage40; dispatched40 from warehouse50 leaving10, Factory stayed60 until receipt then became100; Sales reserved60, physical stayed100, available40; second50 rejected and input retained. Inspected desktop and390px mobile navigation/table behavior.
+- README/current API/ER/schema/assumptions/server docs and demo guide updated. No new libraries, `.env` edits, password changes, commits, push, video recording or external deployment. Preexisting dirty UI changes were preserved. See [full actual checklist and file list](docs/CASE2_RELEASE.md).
+- Remaining: user-reviewed migration/Operations account/redeploy to Neon/Render/Vercel, public verification, meaningful reviewed commits and the 5–7 minute demo video. No future live-verification examples (damaged stock, partial receipt, release/cancel reservation, assigned-location restriction) implemented.
+- Temporary verification API (4100), Vite (5174) and browser tab were stopped/closed at completion. Local container `mini-erp-case2-test` was stopped with data preserved; it can be restarted with `docker start mini-erp-case2-test`. Normal application setup continues to use the README environment and ports.
+
 > This file is the running handoff context for AI-assisted development.
 > Update it after every meaningful milestone. Keep it factual and concise.
 > Never claim a feature/test is complete unless it actually is.

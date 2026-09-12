@@ -1,5 +1,7 @@
 # Phase Plan — Mini ERP + CRM Operations Portal
 
+> **Current workstream (2026-09-12):** Case Study 2 supersedes the old numbered phase plan. Delivery consists of additive Operations schema/API/tests, five required screens, integration checks and documentation. See [current requirements](docs/CASE2.md) and [actual verification](docs/CASE2_RELEASE.md). The older phases below describe the preserved previous case study, not remaining instructions to add features.
+
 ## Guiding Principle
 
 This is a 48-hour case study. Build vertically, validate each phase, and preserve a runnable project.

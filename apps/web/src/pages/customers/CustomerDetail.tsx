@@ -15,7 +15,7 @@ export function CustomerDetail({ edit = false }: { edit?: boolean }) {
   const { id = '' } = useParams(); const { user } = useAuth(); const location = useLocation();
   const load = useCallback(() => customersApi.detail(id), [id]); const resource = useResource(load);
   if (resource.loading) return <Loading />;
-  if (resource.error) return <><Link to="/customers">← Customers</Link><ErrorAlert message={resource.error} retry={resource.retry} /></>;
+  if (resource.error) return <><Link to="/customers">← Back to customers</Link><ErrorAlert message={resource.error} retry={resource.retry} /></>;
   if (!resource.data) return null;
   if (edit) return <CustomerForm key={id} customer={resource.data} />;
   return <DetailContent key={id} customer={resource.data} setCustomer={resource.setData} writable={!!user && canWriteCustomers(user.role)} message={(location.state as { message?: string } | null)?.message} />;
@@ -25,7 +25,7 @@ function DetailContent({ customer, setCustomer, writable, message }: { customer:
   const { register, watch, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<FollowUpValues>({ resolver: zodResolver(followUpSchema), defaultValues: { note: '', schedule: 'keep', followUpDate: '' } });
   const schedule = watch('schedule');
   const fields = [['Business', customer.businessName], ['Email', customer.email], ['Mobile', customer.mobileNumber], ['Type', label(customer.customerType)], ['GST number', customer.gstNumber || 'Not provided'], ['Next follow-up', dateLabel(customer.followUpDate)], ['Address', customer.address], ['Profile notes', customer.notes || 'No profile notes']];
-  return <><Link className="back" to="/customers">← Customers</Link><PageHeader title={customer.customerName} description={customer.businessName}><Badge status={customer.status} />{writable && <Link className="button" to={`/customers/${customer.id}/edit`}>Edit customer</Link>}</PageHeader>
+  return <><Link className="back" to="/customers">← Back to customers</Link><PageHeader title={customer.customerName} description={customer.businessName}><Badge status={customer.status} />{writable && <Link className="button" to={`/customers/${customer.id}/edit`}>Edit customer</Link>}</PageHeader>
     {success && <div role="status" className="alert success">{success}</div>}
     <div className="detail-grid"><section className="card"><h2>Customer information</h2><dl className="customer-info">{fields.map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}</dl></section>
       <section className="card"><div className="section-heading"><h2>Follow-up history</h2><span className="count">{customer.followUps.length}</span></div>

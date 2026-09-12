@@ -1,5 +1,7 @@
 # AI Coding Rules — Mini ERP + CRM Operations Portal
 
+> **Approved scope replacement (2026-09-12):** The current product source is Full-Stack Developer Technical Case Study 2 and [docs/CASE2.md](docs/CASE2.md). The older CRM/challan scope exclusions below do not prohibit this authorized work. Preserve legacy code/data and stack. Enforce available = physical − reserved, no over-reservation, source deduction at dispatch, destination addition only at receipt, duplicate protection and atomic stock/event/status changes. Do not implement the PDF's optional live-verification examples. Run database tests only against isolated local PostgreSQL, never the deployed Neon database.
+
 These rules are instructions for both the developer and any AI coding assistant working on this repository.
 
 ## 1. Source of Truth Order

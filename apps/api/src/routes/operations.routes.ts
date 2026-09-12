@@ -1,0 +1,27 @@
+import { Router } from 'express';
+import { Role } from '@prisma/client';
+import { authenticate } from '../middleware/auth.middleware.js';
+import { authorize } from '../middleware/authorize.middleware.js';
+import * as v from '../validators/operations.validator.js';
+import * as s from '../services/operations.service.js';
+
+export const operationsRouter=Router();
+operationsRouter.use(authenticate);
+operationsRouter.use((_req,res,next)=>{res.set('Cache-Control','no-store');next();});
+const inventory=authorize(...s.inventoryRoles), admin=authorize(Role.ADMIN), sales=authorize(Role.ADMIN,Role.SALES);
+operationsRouter.get('/catalog',async(_req,res)=>{res.json({success:true,data:await s.catalog()});});
+operationsRouter.get('/assignees',admin,async(_req,res)=>{res.json({success:true,data:await s.assignees()});});
+operationsRouter.post('/items',inventory,async(req,res)=>{res.status(201).json({success:true,data:await s.createItem(v.itemInput.parse(req.body))});});
+operationsRouter.post('/locations',inventory,async(req,res)=>{res.status(201).json({success:true,data:await s.createLocation(v.locationInput.parse(req.body))});});
+operationsRouter.get('/inventory',async(req,res)=>{res.json({success:true,data:await s.inventory(v.pageQuery.parse(req.query))});});
+operationsRouter.post('/inventory',inventory,async(req,res)=>{res.status(201).json({success:true,data:await s.createBalance(v.balanceInput.parse(req.body),req.user!.id)});});
+operationsRouter.post('/inventory/:id/adjust',inventory,async(req,res)=>{res.json({success:true,data:await s.adjust(v.operationId.parse(req.params).id,v.adjustmentInput.parse(req.body),req.user!.id)});});
+operationsRouter.get('/inventory/:id/history',async(req,res)=>{res.json({success:true,data:await s.history(v.operationId.parse(req.params).id,v.pageQuery.parse(req.query))});});
+operationsRouter.get('/work-orders',async(req,res)=>{res.json({success:true,data:await s.workOrders(v.pageQuery.parse(req.query))});});
+operationsRouter.post('/work-orders',admin,async(req,res)=>{res.status(201).json({success:true,data:await s.createWork(v.workInput.parse(req.body),req.user!.id)});});
+operationsRouter.patch('/work-orders/:id',inventory,async(req,res)=>{res.json({success:true,data:await s.changeWorkStatus(v.operationId.parse(req.params).id,v.workStatusInput.parse(req.body).status,req.user!)});});
+operationsRouter.get('/transfers',async(req,res)=>{res.json({success:true,data:await s.transfers(v.pageQuery.parse(req.query))});});
+operationsRouter.post('/transfers',inventory,async(req,res)=>{res.status(201).json({success:true,data:await s.requestTransfer(v.transferInput.parse(req.body),req.user!.id)});});
+for(const action of ['dispatch','receive'] as const)operationsRouter.post(`/transfers/:id/${action}`,inventory,async(req,res)=>{res.json({success:true,data:await s.advanceTransfer(v.operationId.parse(req.params).id,action,req.user!.id)});});
+operationsRouter.get('/orders',async(req,res)=>{res.json({success:true,data:await s.orders(v.pageQuery.parse(req.query))});});
+operationsRouter.post('/orders',sales,async(req,res)=>{res.status(201).json({success:true,data:await s.reserveOrder(v.orderInput.parse(req.body),req.user!.id)});});

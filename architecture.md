@@ -1,5 +1,7 @@
 # Architecture — Mini ERP + CRM Operations Portal
 
+> **Case Study 2 update (2026-09-12):** Keep this stack and repository organization. New `/api/operations` routes use dedicated validators/services; new Item/Location/InventoryBalance/InventoryEvent/WorkOrder/InternalTransfer/CustomerOrder models are additive. [Current architecture and role matrix](docs/CASE2.md) and [ER diagram](docs/SCHEMA.md) supersede the legacy module plan below. Legacy stock remains separate. No provider-specific business logic was introduced.
+
 ## 1. Architecture Goal
 
 Use a simple, reviewable full-stack architecture that is fast to build in 48 hours while still demonstrating professional separation of concerns.

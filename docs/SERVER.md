@@ -1,5 +1,13 @@
 # Server setup and deployment
 
+## Case Study 2 update
+
+The stack and environment names are unchanged. Apply `20260912090000_operations_erp` with the existing `npm run db:migrate` (Prisma migrate deploy) before deploying the new backend. It adds tables and the OPERATIONS role without dropping legacy data. Review a backup and target database before running migrations. Never use migrate reset or db push against Neon.
+
+Redeploy backend and frontend together after the migration. Existing JWT users retain their roles/passwords; ensure an Operations demo account in the demo database using the documented seed, which preserves existing accounts. The seed intentionally refuses production mode; use a controlled account-provisioning process for real production users. No automatic inventory conversion or seed stock is performed.
+
+Frontend still needs only `VITE_API_BASE_URL` ending in `/api`; backend still needs the exact frontend `CORS_ORIGIN`, PostgreSQL URL and JWT secret. Verify `/inventory`, `/work-orders`, `/transfers`, `/orders` deep links and the [new demo flow](DEMO.md). See [current local checks](CASE2_RELEASE.md). This update was not applied to Render, Neon or Vercel.
+
 ## Local
 Use Node >=22.12 and npm; PostgreSQL 16 is provided through Docker Compose. From root run `npm install`. Copy the two .env.example files only when local .env files do not exist. Set a random JWT_SECRET (README command). Run `npm run db:up`, `npm run db:generate`, `npm run db:migrate`, `npm run db:check`. Seed demo accounts using README instructions. Run `npm run dev:api` and `npm run dev:web` in separate terminals.
 

@@ -5,7 +5,7 @@ import { customersApi } from '../../api/customers';
 import { productsApi } from '../../api/products';
 import { useAuth } from '../../contexts/AuthContext';
 import { useResource } from '../../hooks/useResource';
-import { ErrorAlert, Loading, PageHeader } from '../../components/ui';
+import { ErrorAlert, Skeleton, PageHeader } from '../../components/ui';
 import { canReadCustomers } from '../../types';
 export async function dashboardMetrics(customerAccess:boolean){
  const result:{title:string;count:number;href:string}[]=[];
@@ -15,4 +15,4 @@ export async function dashboardMetrics(customerAccess:boolean){
  for(const status of ['DRAFT','CONFIRMED']){const r=await api.get<{data:{pagination:{total:number}}}>('/challans',{params:{page:1,limit:1,status}});result.push({title:status==='DRAFT'?'Draft challans':'Confirmed challans',count:r.data.data.pagination.total,href:'/challans'})}
  return result;
 }
-export function Dashboard(){const {user}=useAuth();const read=canReadCustomers(user!.role);const load=useCallback(()=>dashboardMetrics(read),[read]);const r=useResource(load);return <><PageHeader title="Dashboard" description="Current operational totals from your accessible modules."/><ErrorAlert message={r.error} retry={r.retry}/>{r.loading?<Loading/>:r.data&&<div className="metric-grid">{r.data.map(m=><Link key={m.title} className="card metric" to={m.href}><span>{m.title}</span><strong>{m.count}</strong></Link>)}</div>}{!read&&<p>Customer metrics are unavailable for your role.</p>}<p className="dashboard-note">Low stock includes products at or below their minimum alert quantity. Totals refresh when you open this page.</p></>}
+export function Dashboard(){const {user}=useAuth();const read=canReadCustomers(user!.role);const load=useCallback(()=>dashboardMetrics(read),[read]);const r=useResource(load);return <><PageHeader title="Dashboard" description="Current operational totals from your accessible modules."/><ErrorAlert message={r.error} retry={r.retry}/>{r.loading?<Skeleton kind="metrics"/>:r.data&&<div className="metric-grid">{r.data.map(m=><Link key={m.title} className="card metric" to={m.href}><span>{m.title}</span><strong>{m.count}</strong></Link>)}</div>}{!read&&<p>Customer metrics are unavailable for your role.</p>}<p className="dashboard-note">Low stock includes products at or below their minimum alert quantity. Totals refresh when you open this page.</p></>}

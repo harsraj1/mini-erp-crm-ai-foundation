@@ -177,7 +177,7 @@ describe('follow-up history', () => {
 describe('CRM role permissions', () => {
   it.each(Object.values(Role))('enforces read/write permissions for %s on every endpoint', async (role) => {
     const canWrite = role === Role.ADMIN || role === Role.SALES;
-    const canRead = role !== Role.WAREHOUSE;
+    const canRead = role === Role.ADMIN || role === Role.SALES || role === Role.ACCOUNTS;
     const list = await request(app).get('/api/customers').auth(token(role), { type: 'bearer' });
     expect(list.status).toBe(canRead ? 200 : 403);
     expect((await detail(fixtureId, role)).status).toBe(canRead ? 200 : 403);

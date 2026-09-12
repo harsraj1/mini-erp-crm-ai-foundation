@@ -1,0 +1,42 @@
+-- Additive migration: legacy CRM/challan data is intentionally preserved.
+ALTER TYPE "Role" ADD VALUE 'OPERATIONS';
+CREATE TYPE "WorkOrderStatus" AS ENUM ('ASSIGNED','IN_PROGRESS','COMPLETED');
+CREATE TYPE "TransferStatus" AS ENUM ('REQUESTED','DISPATCHED','RECEIVED');
+CREATE TABLE "Item" ("id" TEXT PRIMARY KEY,"name" TEXT NOT NULL,"code" TEXT NOT NULL UNIQUE,"category" TEXT NOT NULL);
+CREATE TABLE "Location" ("id" TEXT PRIMARY KEY,"name" TEXT NOT NULL UNIQUE);
+CREATE TABLE "InventoryBalance" (
+ "id" TEXT PRIMARY KEY,"itemId" TEXT NOT NULL REFERENCES "Item"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "locationId" TEXT NOT NULL REFERENCES "Location"("id") ON DELETE RESTRICT ON UPDATE CASCADE,"batch" TEXT NOT NULL,
+ "physicalQuantity" INTEGER NOT NULL DEFAULT 0,"reservedQuantity" INTEGER NOT NULL DEFAULT 0,
+ CONSTRAINT "InventoryBalance_nonnegative" CHECK ("physicalQuantity">=0 AND "reservedQuantity">=0 AND "reservedQuantity"<="physicalQuantity")
+);
+CREATE UNIQUE INDEX "InventoryBalance_itemId_locationId_batch_key" ON "InventoryBalance"("itemId","locationId","batch");
+CREATE TABLE "WorkOrder" (
+ "id" TEXT PRIMARY KEY,"requestId" TEXT NOT NULL UNIQUE,"itemId" TEXT NOT NULL REFERENCES "Item"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "locationId" TEXT NOT NULL REFERENCES "Location"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "requiredQuantity" INTEGER NOT NULL CHECK ("requiredQuantity">0),
+ "assignedUserId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "createdById" TEXT NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "status" "WorkOrderStatus" NOT NULL DEFAULT 'ASSIGNED',"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE "InternalTransfer" (
+ "id" TEXT PRIMARY KEY,"requestId" TEXT NOT NULL UNIQUE,
+ "sourceBalanceId" TEXT NOT NULL REFERENCES "InventoryBalance"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "destinationLocationId" TEXT NOT NULL REFERENCES "Location"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "quantity" INTEGER NOT NULL CHECK ("quantity">0),"status" "TransferStatus" NOT NULL DEFAULT 'REQUESTED',
+ "createdById" TEXT NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"dispatchedAt" TIMESTAMP(3),"receivedAt" TIMESTAMP(3)
+);
+CREATE TABLE "CustomerOrder" (
+ "id" TEXT PRIMARY KEY,"requestId" TEXT NOT NULL UNIQUE,"customerName" TEXT NOT NULL,
+ "balanceId" TEXT NOT NULL REFERENCES "InventoryBalance"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "quantity" INTEGER NOT NULL CHECK ("quantity">0),"createdById" TEXT NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE "InventoryEvent" (
+ "id" TEXT PRIMARY KEY,"requestId" TEXT NOT NULL UNIQUE,
+ "balanceId" TEXT NOT NULL REFERENCES "InventoryBalance"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "physicalChange" INTEGER NOT NULL,"reservedChange" INTEGER NOT NULL,"reason" TEXT NOT NULL,
+ "createdById" TEXT NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
